@@ -32,6 +32,9 @@ for i in range(len(points)):
     xi, yi = x_indices[i], y_indices[i]
     depth_grid[yi, xi] = points[i, 2]
 
+# Compute the minimum depth value
+min_depth = np.nanmin(depth_grid)
+
 # Define the number of sub-grids
 sub_grid_size = resolution // x
 
@@ -45,11 +48,15 @@ for i in range(x):
         # Extract the sub-grid
         sub_grid = depth_grid[start_row:end_row, start_col:end_col]
 
-        # Compute the average depth value of the sub-grid
-        avg_depth = np.nanmean(sub_grid)
-
-        # Fill the sub-grid with the average depth value
-        depth_grid[start_row:end_row, start_col:end_col] = avg_depth
+        # Check if the sub-grid is empty (contains only NaNs)
+        if np.all(np.isnan(sub_grid)):
+            # Set the entire sub-grid to the minimum depth value
+            depth_grid[start_row:end_row, start_col:end_col] = min_depth
+        else:
+            # Compute the average depth value of the sub-grid
+            avg_depth = np.nanmean(sub_grid)
+            # Fill the sub-grid with the average depth value
+            depth_grid[start_row:end_row, start_col:end_col] = avg_depth
 
 # Normalize depth grid for visualization
 depth_grid_normalized = (depth_grid - np.nanmin(depth_grid)) / (np.nanmax(depth_grid) - np.nanmin(depth_grid))
