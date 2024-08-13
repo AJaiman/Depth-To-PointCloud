@@ -108,14 +108,14 @@ def create_point_cloud(depth_image, color_image, camera_intrinsics=None, scale_r
 
         return cloud
 
-
-def remove_points_threshold(cloud, y_threshold, z_threshold):
+def filter_pointcloud(cloud, y_threshold, z_threshold):
     points = np.asarray(cloud.points)
     mask = points[:, 1] <= y_threshold
     filteredPoints = points[mask]
     mask = filteredPoints[:, 2] <= z_threshold
     filteredPoints = filteredPoints[mask]
     filteredPoints[:, [1, 2]] = filteredPoints[:, [2, 1]]
+    filteredPoints[:, 2] = filteredPoints[:, 2] * -1
     return o3d.utility.Vector3dVector(filteredPoints)
 
 
@@ -124,9 +124,8 @@ def remove_points_threshold(cloud, y_threshold, z_threshold):
 
 output_path = './pointclouds'
 
-
 cloud = create_point_cloud(imageSample[1], imageSample[0])
-cloud.points = remove_points_threshold(cloud, 0.2, 3)
+cloud.points = filter_pointcloud(cloud, 0.2, 3)
 print(type(cloud))
 o3d.io.write_point_cloud(os.path.join(output_path, f'testPC.ply'), cloud)
 
