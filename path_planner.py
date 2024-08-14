@@ -35,12 +35,18 @@ for i in range(len(points)):
 # Compute the minimum depth value
 min_depth = np.nanmin(depth_grid)
 
-# Define the number of sub-grids
-sub_grid_size = resolution // x
+# Define the size of the final depth grid
+final_grid_size = x
+
+# Initialize the final depth grid
+final_depth_grid = np.full((final_grid_size, final_grid_size), min_depth)
+
+# Define the size of each sub-grid in the original grid
+sub_grid_size = resolution // final_grid_size
 
 # Process each sub-grid
-for i in range(x):
-    for j in range(x):
+for i in range(final_grid_size):
+    for j in range(final_grid_size):
         # Define the bounds of the current sub-grid
         start_row, end_row = i * sub_grid_size, (i + 1) * sub_grid_size
         start_col, end_col = j * sub_grid_size, (j + 1) * sub_grid_size
@@ -50,26 +56,27 @@ for i in range(x):
 
         # Check if the sub-grid is empty (contains only NaNs)
         if np.all(np.isnan(sub_grid)):
-            # Set the entire sub-grid to the minimum depth value
-            depth_grid[start_row:end_row, start_col:end_col] = min_depth
+            # Set the depth value to the minimum depth value
+            final_depth_grid[i, j] = min_depth
         else:
             # Compute the average depth value of the sub-grid
             avg_depth = np.nanmean(sub_grid)
-            # Fill the sub-grid with the average depth value
-            depth_grid[start_row:end_row, start_col:end_col] = avg_depth
+            # Fill the final grid with the average depth value
+            final_depth_grid[i, j] = avg_depth
 
-# Normalize depth grid for visualization
-depth_grid_normalized = (depth_grid - np.nanmin(depth_grid)) / (np.nanmax(depth_grid) - np.nanmin(depth_grid))
-depth_grid_visual = (depth_grid_normalized * 255).astype(np.uint8)
+# Normalize final depth grid for visualization
+final_depth_grid_normalized = (final_depth_grid - np.nanmin(final_depth_grid)) / (np.nanmax(final_depth_grid) - np.nanmin(final_depth_grid))
+final_depth_grid_visual = (final_depth_grid_normalized * 255).astype(np.uint8)
 
-# Save the depth grid to a file
-np.save('depth_grid.npy', depth_grid)
+# Save the final depth grid to a file
+np.save('final_depth_grid.npy', final_depth_grid)
 
-# Create and save the depth map image
-cv2.imwrite('depth_map.png', depth_grid_visual)
+# Create and save the final depth map image
+cv2.imwrite('final_depth_map.png', final_depth_grid_visual)
 
-# Visualize the depth map using matplotlib
-plt.imshow(depth_grid_visual, cmap='gray')
+# Visualize the final depth map using matplotlib
+plt.imshow(final_depth_grid_visual, cmap='gray')
 plt.colorbar()
-plt.title('Depth Map')
+plt.title('Final Depth Map')
 plt.show()
+print(len(final_depth_grid))
