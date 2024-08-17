@@ -135,12 +135,52 @@ for i in range(grid_box_rows):
 # Convert grid_boxes to a numpy array for easier manipulation
 grid_boxes = np.array(grid_boxes)
 
-print(grid_boxes[19, 5].theta)
+# Visualization of GridBox objects
+visualization_grid = np.zeros((grid_box_rows, grid_box_cols), dtype=np.uint8)
 
+# First pass: Mark squares as white (passable) or black (impassable)
+for i in range(grid_box_rows):
+    for j in range(grid_box_cols):
+        if grid_boxes[i][j].total_cost() == float('inf'):
+            visualization_grid[i, j] = 0  # Black
+        else:
+            visualization_grid[i, j] = 255  # White
 
+# Second pass: Mark unreachable (gray) squares
+def is_unreachable(i, j):
+    if i == 0 or i == grid_box_rows - 1 or j == 0 or j == grid_box_cols - 1:
+        return visualization_grid[i, j] == 255
+    return (visualization_grid[i, j] == 255 and
+            visualization_grid[i-1, j] == 0 and
+            visualization_grid[i+1, j] == 0 and
+            visualization_grid[i, j-1] == 0 and
+            visualization_grid[i, j+1] == 0)
+
+for i in range(grid_box_rows):
+    for j in range(grid_box_cols):
+        if is_unreachable(i, j):
+            visualization_grid[i, j] = 128  # Gray
+
+# Create a larger image for better visibility
+scale_factor = 10
+large_viz_grid = np.kron(visualization_grid, np.ones((scale_factor, scale_factor), dtype=np.uint8))
+
+# Display the visualization
+plt.figure(figsize=(10, 10))
+plt.imshow(large_viz_grid, cmap='gray', interpolation='nearest')
+plt.title('GridBox Visualization')
+plt.colorbar(ticks=[0, 128, 255], label='Passability')
+plt.gca().set_yticks(np.arange(0, grid_box_rows * scale_factor, scale_factor) + scale_factor / 2)
+plt.gca().set_xticks(np.arange(0, grid_box_cols * scale_factor, scale_factor) + scale_factor / 2)
+plt.gca().set_yticklabels(range(grid_box_rows))
+plt.gca().set_xticklabels(range(grid_box_cols))
+plt.gca().set_xticks(np.arange(-.5, grid_box_cols * scale_factor, scale_factor), minor=True)
+plt.gca().set_yticks(np.arange(-.5, grid_box_rows * scale_factor, scale_factor), minor=True)
+plt.grid(which='minor', color='b', linestyle='-', linewidth=2)
+plt.show()
 
 # Uncomment for Visualization
-
+"""
 #  Normalize final depth grid for visualization
 final_depth_grid_normalized = (final_depth_grid - np.nanmin(final_depth_grid)) / (np.nanmax(final_depth_grid) - np.nanmin(final_depth_grid))
 final_depth_grid_visual = (final_depth_grid_normalized * 255).astype(np.uint8)
@@ -149,3 +189,4 @@ plt.imshow(final_depth_grid_visual, cmap='gray')
 plt.colorbar()
 plt.title('Final Depth Map')
 plt.show()
+"""

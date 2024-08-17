@@ -19,7 +19,7 @@ class GridBox:
         self.M = 1000  # Mass of the rover in kg
         self.g_lun = 1.62  # Lunar gravitational acceleration in m/s^2
         self.l = 1  # Grid size in meters
-        self.theta_max = 30  # Maximum allowable slope angle in degrees
+        self.theta_max = 1  # Maximum allowable slope angle in degrees
         self.l_max = 0.5  # Maximum surmountable obstacle height in meters
 
     def set_neighbors(self, n, s, e, w, ne, nw, se, sw):
