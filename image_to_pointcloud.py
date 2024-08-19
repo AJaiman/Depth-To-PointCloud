@@ -116,6 +116,7 @@ def filter_pointcloud(cloud, y_threshold, z_threshold):
     filteredPoints = filteredPoints[mask]
     filteredPoints[:, [1, 2]] = filteredPoints[:, [2, 1]]
     filteredPoints[:, 2] = filteredPoints[:, 2] * -1
+    filteredPoints[:, 0] = filteredPoints[:, 0] * -1
     return o3d.utility.Vector3dVector(filteredPoints)
 
 
