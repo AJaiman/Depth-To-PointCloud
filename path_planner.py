@@ -146,21 +146,6 @@ for i in range(grid_box_rows):
         else:
             visualization_grid[i, j] = 255  # White
 
-# Second pass: Mark unreachable (gray) squares
-def is_unreachable(i, j):
-    if i == 0 or i == grid_box_rows - 1 or j == 0 or j == grid_box_cols - 1:
-        return visualization_grid[i, j] == 255
-    return (visualization_grid[i, j] == 255 and
-            visualization_grid[i-1, j] == 0 and
-            visualization_grid[i+1, j] == 0 and
-            visualization_grid[i, j-1] == 0 and
-            visualization_grid[i, j+1] == 0)
-
-for i in range(grid_box_rows):
-    for j in range(grid_box_cols):
-        if is_unreachable(i, j):
-            visualization_grid[i, j] = 128  # Gray
-
 # Create a larger image for better visibility
 scale_factor = 10
 large_viz_grid = np.kron(visualization_grid, np.ones((scale_factor, scale_factor), dtype=np.uint8))
