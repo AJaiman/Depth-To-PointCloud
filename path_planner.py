@@ -3,7 +3,10 @@ import open3d as o3d
 import matplotlib.pyplot as plt
 import cv2
 from GridBox import GridBox
+import AStar
+import Dijkstra
 
+starting_point = (0,13)
 # Load the point cloud
 point_cloud = o3d.io.read_point_cloud("pointclouds/testPC.ply")
 points = np.asarray(point_cloud.points)
@@ -135,8 +138,8 @@ for i in range(grid_box_rows):
 # Convert grid_boxes to a numpy array for easier manipulation
 grid_boxes = np.array(grid_boxes)
 
-# Visualization of GridBox objects
-visualization_grid = np.zeros((grid_box_rows, grid_box_cols), dtype=np.uint8)
+# Visualization of 2D GridBox Array
+visualization_grid = np.zeros((grid_box_rows, grid_box_cols), dtype=np.float64)
 
 # First pass: Mark squares as white (passable) or black (impassable)
 for i in range(grid_box_rows):
@@ -144,7 +147,20 @@ for i in range(grid_box_rows):
         if grid_boxes[i][j].total_cost() == float('inf'):
             visualization_grid[i, j] = 0  # Black
         else:
-            visualization_grid[i, j] = 255  # White
+            visualization_grid[i, j] = 1  # White
+
+# TODO Path Finding Algorithm
+end_point = (15, 20)
+# Assuming visualization_grid, starting_point, and end_point are defined
+path = AStar.a_star(visualization_grid, starting_point, end_point)
+
+if path:
+    AStar.update_array_with_path(visualization_grid, path)
+    print("Path found and updated.")
+else:
+    print("No path found.")
+
+visualization_grid = visualization_grid * 255
 
 # Create a larger image for better visibility
 scale_factor = 10
@@ -164,7 +180,7 @@ plt.gca().set_yticks(np.arange(-.5, grid_box_rows * scale_factor, scale_factor),
 plt.grid(which='minor', color='b', linestyle='-', linewidth=2)
 plt.show()
 
-# Uncomment for Visualization
+# Uncomment for Depth Grid Visualization
 """
 #  Normalize final depth grid for visualization
 final_depth_grid_normalized = (final_depth_grid - np.nanmin(final_depth_grid)) / (np.nanmax(final_depth_grid) - np.nanmin(final_depth_grid))
