@@ -5,11 +5,7 @@ from transformers import AutoImageProcessor, AutoModelForDepthEstimation
 import cv2
 import matplotlib.pyplot as plt
 import open3d as o3d
-
 import os
-import random
-from pathlib import Path
-import glob
 
 # Load Sample Image
 

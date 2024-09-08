@@ -1,10 +1,8 @@
 import numpy as np
 import open3d as o3d
 import matplotlib.pyplot as plt
-import cv2
 from GridBox import GridBox
 import AStar
-import Dijkstra
 
 starting_point = (0,13)
 # Load the point cloud
