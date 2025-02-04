@@ -20,48 +20,23 @@ The system consists of three main components:
 
 1. **Depth Estimation and Point Cloud Generation**
    - Uses DepthAnything's ViT-S model for depth inference
-   - Converts 2D depth maps to 3D point clouds
-   ```python:image_to_pointcloud.py
-   # Model initialization and depth inference
-   processor = AutoImageProcessor.from_pretrained("LiheYoung/depth-anything-small-hf")
-   model = AutoModelForDepthEstimation.from_pretrained("LiheYoung/depth-anything-small-hf").to('cuda')
-
-   # Process image and generate depth map
-   input = processor(images=image, return_tensors='pt').to('cuda')
-   with torch.no_grad():
-       outputs = model(**input)
-       depth = outputs.predicted_depth
-   ```
+   - Converts 2D depth maps to 3D point clouds using camera intrinsics
+   - Implements filtering and optimization for point cloud quality
+   - Handles coordinate transformations and spatial mapping
 
 2. **Terrain Analysis**
    - Implements grid-based terrain segmentation
-   - Calculates traversability costs
-   ```python:GridBox.py
-   def total_cost(self):
-       return self.obstacle_crossing_cost() + self.slope_climbing_cost()
-   
-   def obstacle_crossing_cost(self):
-       l_ele = self.calculate_l_ele()
-       l_obs = max(l_ele) - min(l_ele)
-       
-       if l_obs <= self.l_max:
-           return self.M * self.g_lun * l_obs
-       else:
-           return float('inf')
-   ```
+   - Calculates traversability costs based on:
+     - Slope climbing requirements
+     - Obstacle height assessment
+     - Combined cost metrics for path optimization
+   - Generates comprehensive terrain accessibility maps
 
 3. **Path Planning**
    - A* algorithm implementation for optimal path finding
+   - Integrates terrain cost analysis for path selection
    - Avoids obstacles while minimizing energy costs
-   ```python:AStar.py
-   def a_star(array, start, end):
-       rows, cols = array.shape
-       open_set = []
-       heapq.heappush(open_set, (0, start))
-       came_from = {}
-       g_score = {start: 0}
-       f_score = {start: heuristic(start, end)}
-   ```
+   - Provides efficient route planning in real-world environments
 
 ## Current Implementation
 
