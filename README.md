@@ -22,25 +22,62 @@ The system consists of three main components:
    - Uses DepthAnything's ViT-S model for depth inference
    - Converts 2D depth maps to 3D point clouds
    ```python:image_to_pointcloud.py
-   startLine: 18
-   endLine: 31
+   # Model initialization and depth inference
+   processor = AutoImageProcessor.from_pretrained("LiheYoung/depth-anything-small-hf")
+   model = AutoModelForDepthEstimation.from_pretrained("LiheYoung/depth-anything-small-hf").to('cuda')
+
+   # Process image and generate depth map
+   input = processor(images=image, return_tensors='pt').to('cuda')
+   with torch.no_grad():
+       outputs = model(**input)
+       depth = outputs.predicted_depth
    ```
 
 2. **Terrain Analysis**
    - Implements grid-based terrain segmentation
    - Calculates traversability costs
    ```python:GridBox.py
-   startLine: 35
-   endLine: 69
+   def total_cost(self):
+       return self.obstacle_crossing_cost() + self.slope_climbing_cost()
+   
+   def obstacle_crossing_cost(self):
+       l_ele = self.calculate_l_ele()
+       l_obs = max(l_ele) - min(l_ele)
+       
+       if l_obs <= self.l_max:
+           return self.M * self.g_lun * l_obs
+       else:
+           return float('inf')
    ```
 
 3. **Path Planning**
    - A* algorithm implementation for optimal path finding
    - Avoids obstacles while minimizing energy costs
    ```python:AStar.py
-   startLine: 9
-   endLine: 42
+   def a_star(array, start, end):
+       rows, cols = array.shape
+       open_set = []
+       heapq.heappush(open_set, (0, start))
+       came_from = {}
+       g_score = {start: 0}
+       f_score = {start: heuristic(start, end)}
    ```
+
+## Current Implementation
+
+The project is currently implemented as two separate processes:
+
+1. **Point Cloud Generation** (`image_to_pointcloud.py`)
+   - Handles image capture and processing
+   - Performs depth estimation
+   - Generates and saves point cloud data
+
+2. **Path Planning** (`path_planner.py`)
+   - Loads processed point cloud data
+   - Performs terrain analysis
+   - Executes path planning algorithm
+
+Future work includes integrating these processes into a single pipeline for real-time operation.
 
 ## Implementation Details
 
